@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLCH Score</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .score-container {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .team-input {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .team-input input {
+            width: 45%;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            text-align: center;
+        }
+        .teams {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .team {
+            width: 40%;
+        }
+        .team-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            min-height: 24px;
+        }
+        .score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #4ecca3;
+        }
+        .time {
+            font-size: 24px;
+            margin: 20px 0;
+            color: #ffd700;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        button {
+            background: #4ecca3;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .overlay-link {
+            display: block;
+            margin-top: 20px;
+            color: #4ecca3;
+            text-decoration: none;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="score-container">
+        <div class="team-input">
+            <input type="text" id="home-team-input" placeholder="Название домашней команды" oninput="updateTeamName('home', this.value)">
+            <input type="text" id="away-team-input" placeholder="Название гостевой команды" oninput="updateTeamName('away', this.value)">
+        </div>
+        
+        <div class="teams">
+            <div class="team">
+                <div class="team-name" id="home-team-name">Домашняя</div>
+                <div class="score" id="home-score">0</div>
+            </div>
+            <div class="score">:</div>
+            <div class="team">
+                <div class="team-name" id="away-team-name">Гостевая</div>
+                <div class="score" id="away-score">0</div>
+            </div>
+        </div>
+        
+        <div class="time" id="match-time">00:00</div>
+        
+        <div class="controls">
+            <button onclick="updateScore('home')">Гол хозяев</button>
+            <button onclick="updateScore('away')">Гол гостей</button>
+            <button onclick="resetScore()">Сбросить</button>
+            <button onclick="updateTime()">+1 мин</button>
+        </div>
+        
+        <a href="/overlay.html" class="overlay-link" target="_blank">Наложение для трансляции</a>
+    </div>
+
+    <script>
+        let homeScore = 0;
+        let awayScore = 0;
+        let minutes = 0;
+        let seconds = 0;
+        let timerInterval;
+        let homeTeamName = "Домашняя";
+        let awayTeamName = "Гостевая";
+
+        function updateTeamName(team, name) {
+            if (team === 'home') {
+                homeTeamName = name || "Домашняя";
+                document.getElementById('home-team-name').textContent = homeTeamName;
+            } else {
+                awayTeamName = name || "Гостевая";
+                document.getElementById('away-team-name').textContent = awayTeamName;
+            }
+        }function updateScore(team) {
+            if (team === 'home') homeScore++;
+            if (team === 'away') awayScore++;
+            
+            document.getElementById('home-score').textContent = homeScore;
+            document.getElementById('away-score').textContent = awayScore;
+        }
+
+        function resetScore() {
+            homeScore = 0;
+            awayScore = 0;
+            minutes = 0;
+            seconds = 0;
+            
+            document.getElementById('home-score').textContent = homeScore;
+            document.getElementById('away-score').textContent = awayScore;
+            document.getElementById('match-time').textContent = '00:00';
+            
+            clearInterval(timerInterval);
+        }
+
+        function updateTime() {
+            minutes++;
+            if (minutes > 90) minutes = 90;
+            
+            const timeString = ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')};
+            document.getElementById('match-time').textContent = timeString;
+        }
+
+        // Автозапуск таймера
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                seconds++;
+                if (seconds === 60) {
+                    seconds = 0;
+                    minutes++;
+                }
+                if (minutes > 90) {
+                    clearInterval(timerInterval);
+                    minutes = 90;
+                    seconds = 0;
+                }
+                
+                const timeString = ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')};
+                document.getElementById('match-time').textContent = timeString;
+            }, 1000);
+        }
+
+        startTimer();function updateLocalStorage() {
+    const scoreData = {
+        homeTeam: homeTeamName,
+        awayTeam: awayTeamName,
+        homeScore: homeScore,
+        awayScore: awayScore,
+        time: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}
+    };
+    localStorage.setItem('scoreData', JSON.stringify(scoreData));
+}
+
+// И вызывайте её после каждого изменения:
+function updateScore(team) {
+    if (team === 'home') homeScore++;
+    if (team === 'away') awayScore++;
+    updateLocalStorage();
+    </script>
+</body>
+</html>
