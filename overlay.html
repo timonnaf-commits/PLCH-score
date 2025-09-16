@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Overlay</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: transparent;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+        .score-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 5px 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+        }
+        @media (min-width: 640px) {
+            .score-container {
+                font-size: 3rem;
+                padding: 10px 20px;
+                border-radius: 10px;
+            }
+        }
+        .team {
+            text-align: center;
+            padding: 0 5px;
+        }
+        .score {
+            font-size: 2rem;
+            padding: 0 5px;
+        }
+        .time {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 1rem;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 3px 5px;
+            border-radius: 3px;
+        }
+        @media (min-width: 640px) {
+            .team {
+                padding: 0 15px;
+            }
+            .score {
+                font-size: 4rem;
+                padding: 0 10px;
+            }
+            .time {
+                top: 10px;
+                right: 10px;
+                font-size: 1.5rem;
+                padding: 5px 10px;
+                border-radius: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="time" id="matchTime">0'</div>
+    <div class="score-container">
+        <div class="team" id="homeTeam">Хозяева</div>
+        <div class="score" id="score">0:0</div>
+        <div class="team" id="awayTeam">Гости</div>
+    </div>
+
+    <script>
+        // Get parameters from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const homeTeam = urlParams.get('home') || 'Хозяева';
+        const awayTeam = urlParams.get('away') || 'Гости';
+        const homeScore = urlParams.get('homeScore') || '0';
+        const awayScore = urlParams.get('awayScore') || '0';
+        const time = urlParams.get('time') || '0';
+
+        // Update display
+        document.getElementById('homeTeam').textContent = homeTeam;
+        document.getElementById('awayTeam').textContent = awayTeam;
+        document.getElementById('score').textContent = `${homeScore}:${awayScore}`;
+        document.getElementById('matchTime').textContent = `${time}'`;
+
+        // Auto-refresh every 5 seconds
+        setInterval(() => {
+            window.location.reload();
+        }, 5000);
+    </script>
+</body>
+</html>
