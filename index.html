@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Match Scoreboard</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+</head>
+<body class="bg-white text-gray-800">
+    <div class="container mx-auto px-4 py-8 max-w-md">
+        <div class="text-center mb-6">
+            <img src="https://yt3.googleusercontent.com/30S6wgUhfa4Zg_wWMOD-rsesKSuhFKJL050PGL-GJvU8SdIYgvaNwIPezxjQ0vCV7lts4b-Wpw=s900-c-k-c0x00ffffff-no-rj" alt="PLCH Logo" class="h-16 mx-auto mb-2">
+            <h1 class="text-3xl font-bold text-blue-600">PLCH SCORE</h1>
+        </div>
+
+        <div class="bg-blue-50 border border-blue-100 rounded p-4">
+            <!-- Team Names -->
+            <div class="flex justify-between items-center mb-6">
+                <div class="w-2/5 text-center">
+                    <input type="text" id="homeTeam" placeholder="Хозяева" 
+                           class="border-b border-gray-400 text-xl text-center focus:outline-none focus:border-blue-500 w-full">
+                </div>
+                <div class="text-xl font-bold mx-2">VS</div>
+                <div class="w-2/5 text-center">
+                    <input type="text" id="awayTeam" placeholder="Гости" 
+                           class="border-b border-gray-400 text-xl text-center focus:outline-none focus:border-blue-500 w-full">
+                </div>
+            </div>
+
+            <!-- Score and Time -->
+            <div class="flex justify-between items-center mb-6">
+                <div class="text-center w-2/5">
+                    <div class="text-5xl font-bold" id="homeScore">0</div>
+                    <div class="flex justify-center space-x-2 mt-2">
+                        <button onclick="updateScore('home', -1)" class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded">
+                            <i data-feather="minus"></i>
+                        </button>
+                        <button onclick="updateScore('home', 1)" class="bg-blue-500 text-white hover:bg-blue-600 px-3 py-1 rounded">
+                            <i data-feather="plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <div class="text-2xl font-mono bg-gray-200 px-4 py-2 rounded" id="matchTime">00:00</div>
+                    <div class="flex justify-center space-x-2 mt-2">
+                        <button onclick="startTimer()" class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded">
+                            <i data-feather="play"></i>
+                        </button>
+                        <button onclick="stopTimer()" class="bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded">
+                            <i data-feather="pause"></i>
+                        </button>
+                        <button onclick="resetTimer()" class="bg-blue-500 text-white hover:bg-blue-600 px-3 py-1 rounded">
+                            <i data-feather="refresh-cw"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-center w-2/5">
+                    <div class="text-5xl font-bold" id="awayScore">0</div>
+                    <div class="flex justify-center space-x-2 mt-2">
+                        <button onclick="updateScore('away', -1)" class="bg-blue-500 text-white hover:bg-blue-600 px-3 py-1 rounded">
+                            <i data-feather="minus"></i>
+                        </button>
+                        <button onclick="updateScore('away', 1)" class="bg-blue-500 text-white hover:bg-blue-600 px-3 py-1 rounded">
+                            <i data-feather="plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overlay Link -->
+            <div class="mt-6 text-center">
+                <div class="mb-1 text-sm">Ссылка на наложение:</div>
+                <input type="text" id="overlayLink" readonly 
+                       class="bg-gray-200 text-center p-1 rounded w-full text-sm" 
+                       value="Скопируйте эту ссылку для наложения на трансляцию">
+                <button onclick="copyOverlayLink()" class="mt-1 bg-blue-500 text-white hover:bg-blue-600 px-3 py-1 rounded text-sm">
+                    <i data-feather="copy"></i> Copy
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-6 text-gray-500 text-sm">
+            <p>Made by Plinkiws</p>
+        </div>
+    </div>
+
+    <script>
+        let timer;
+        let seconds = 0;
+        let isRunning = false;
+
+        function updateScore(team, change) {
+            const element = document.getElementById(team + 'Score');
+            let score = parseInt(element.textContent);
+            score += change;
+            if (score < 0) score = 0;
+            element.textContent = score;
+            updateOverlayLink();
+        }
+
+        function startTimer() {
+            if (!isRunning) {
+                isRunning = true;
+                timer = setInterval(() => {
+                    seconds++;
+                    updateTimerDisplay();
+                }, 1000);
+            }
+        }
+
+        function stopTimer() {
+            clearInterval(timer);
+            isRunning = false;
+        }
+
+        function resetTimer() {
+            stopTimer();
+            seconds = 0;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            document.getElementById('matchTime').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            updateOverlayLink();
+        }
+
+        function updateOverlayLink() {
+            const homeTeam = document.getElementById('homeTeam').value || 'Home';
+            const awayTeam = document.getElementById('awayTeam').value || 'Away';
+            const homeScore = document.getElementById('homeScore').textContent;
+            const awayScore = document.getElementById('awayScore').textContent;
+            const time = document.getElementById('matchTime').textContent;
+            
+            const params = new URLSearchParams({
+                home: homeTeam,
+                away: awayTeam,
+                homeScore,
+                awayScore,
+                time
+            });
+            
+            const overlayLink = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+            document.getElementById('overlayLink').value = overlayLink;
+        }
+
+        function copyOverlayLink() {
+            const link = document.getElementById('overlayLink');
+            link.select();
+            document.execCommand('copy');
+            alert('Ссылка скопирована в буфер обмена!');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+            AOS.init();
+            
+            // Load from URL params if available
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('home')) {
+                document.getElementById('homeTeam').value = urlParams.get('home');
+                document.getElementById('awayTeam').value = urlParams.get('away');
+                document.getElementById('homeScore').textContent = urlParams.get('homeScore');
+                document.getElementById('awayScore').textContent = urlParams.get('awayScore');
+                document.getElementById('matchTime').textContent = urlParams.get('time');
+            }
+            
+            // Update overlay link when team names change
+            document.getElementById('homeTeam').addEventListener('input', updateOverlayLink);
+            document.getElementById('awayTeam').addEventListener('input', updateOverlayLink);
+        });
+    </script>
+</body>
+</html>
